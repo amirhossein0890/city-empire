@@ -1,0 +1,17 @@
+{
+  "name": "City Empire",
+  "short_name": "City Empire",
+  "description": "بازی شهرسازی و مدیریت امپراتوری شهری",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#172530",
+  "theme_color": "#172530",
+  "lang": "fa",
+  "dir": "rtl",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

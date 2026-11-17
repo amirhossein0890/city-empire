@@ -4,6 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <meta name="theme-color" content="#172530">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="description" content="City Empire — نسخه یکپارچه و بهینه بازی شهرسازی و مدیریت امپراتوری شهری">
 <title>City Empire Ultimate | امپراتوری شهر</title>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/vazirmatn/33.003/Vazirmatn-font-face.css" rel="stylesheet">
@@ -1739,7 +1743,7 @@ function draw(t,dt){
   }
   ctx.setTransform(dpr,0,0,dpr,0,0);
   drawBankRing();
-  drawFx(dt);
+  ctx.save();ctx.globalAlpha=1;ctx.lineWidth=1;drawFx(dt);ctx.restore();
   drawAtmosphere(t,dt);
 }
 
