@@ -9,7 +9,7 @@
 <link rel="apple-touch-icon" href="icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="description" content="City Empire — نسخه یکپارچه و بهینه بازی شهرسازی و مدیریت امپراتوری شهری">
-<title>City Empire Ultimate | امپراتوری شهر</title>
+<title>City Empire (آفلاین) | امپراتوری شهر</title>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/vazirmatn/33.003/Vazirmatn-font-face.css" rel="stylesheet">
 <style>
 :root{
@@ -273,7 +273,7 @@ body:after{
   <button class="reset" id="reset">شروع دوباره</button>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <script>
 (function(){
 'use strict';
@@ -1812,8 +1812,7 @@ function endCameraPointer(e){
     drag={id,x:p.x,y:p.y,sx:p.x,sy:p.y};
     pinch=null;gestureConsumed=true;
   }else{
-    if(wasSingle&&!gestureConsumed&&pointerStart)
-      selectFarmAt(pointerStart.x,pointerStart.y);
+    try{if(wasSingle&&!gestureConsumed&&pointerStart&&typeof selectFarmAt==='function')selectFarmAt(pointerStart.x,pointerStart.y);}catch(err){console.error(err);}
     drag=null;pinch=null;pointerStart=null;gestureConsumed=false;
     cv.style.cursor='grab';
   }
@@ -2309,9 +2308,10 @@ async function load(){
     const f=fresh();S=Object.assign(f,S);S.purchases=Math.max(0,Math.min(150,Math.floor(Number(S.purchases)||0)));S.money=Number.isFinite(Number(S.money))?Math.max(0,Number(S.money)):200;S.total=Number.isFinite(Number(S.total))?Math.max(0,Number(S.total)):0;S.n=Object.assign(f.n,S.n||{});S.unl=Object.assign(f.unl,S.unl||{});S.inventions=Array.isArray(S.inventions)?S.inventions:[];S.bizLoans=Array.isArray(S.bizLoans)?S.bizLoans:[];S.bizGrowth=Object.assign(f.bizGrowth,S.bizGrowth||{});S.farmData=Object.assign(f.farmData,S.farmData||{});S.militaryData=Object.assign(f.militaryData,S.militaryData||{});S.militaryData.aircraft=Object.assign({},S.militaryData.aircraft||{});['ground','air','naval'].forEach(k=>S.militaryData[k]=Object.assign(f.militaryData[k],S.militaryData[k]||{}));S.schoolData=Object.assign(f.schoolData,S.schoolData||{});S.citySystems=Object.assign(f.citySystems,S.citySystems||{});S.buildingLevels=Object.assign({},S.buildingLevels||{});S.policy=S.policy||'balanced';S.mayorPopularity=Number(S.mayorPopularity)||55;S.tradeCount=Number(S.tradeCount)||0;S.tradeReadyAt=Math.max(0,Number(S.tradeReadyAt)||0);S.personalLoan=Math.max(0,Number(S.personalLoan)||0);S.personalLoanDue=Math.max(0,Number(S.personalLoanDue)||0);S.personalLoanMonths=Math.max(1,Number(S.personalLoanMonths)||24);S.personalLoanRemaining=Math.max(0,Number(S.personalLoanRemaining)||0);S.personalLoanInstallment=Math.max(0,Number(S.personalLoanInstallment)||0);S.missionStage=Math.max(0,Number(S.missionStage)||0);S.claimed=Array.isArray(S.claimed)?S.claimed:[];S.news=Array.isArray(S.news)?S.news.slice(0,NEWS_LIMIT):[];if(!S.taxPercent)S.taxPercent=[7,12,19][Number(S.taxPolicy??1)]||12;
     const away=Math.max(0,Math.min(8*3600,(Date.now()-(Number(S.lastSeen)||Date.now()))/1000));
     const gain=away*((S.n.auto||0)*TYPES.auto.passive+farmIncomeRate()+(S.res*taxRate()*.25)+((S.schoolData?.uniGraduates||0)*.22)+(systems().buses||0)*.7+(systems().taxis||0)*.35+tourismScore()*.2);if(gain>0){earn(gain);S.offlineGain=gain;}
-  }catch(e){}
+    window.__loadOK=true;
+  }catch(e){window.__loadOK=false;console.error('LOAD ERROR',e);setTimeout(function(){try{toast('بارگذاری ذخیره با خطا روبه‌رو شد؛ برای محافظت از پیشرفتت، ذخیره انجام نمیشه',7000);}catch(_){}},1500);}
 }
-function save(){try{S.lastSeen=Date.now();const raw=JSON.stringify(S);if(window.storage)window.storage.set(KEY,raw);else localStorage.setItem(KEY,raw);if(window.__ceCloudSync){clearTimeout(window.__ceCloudSyncTimer);window.__ceCloudSyncTimer=setTimeout(()=>{if(navigator.onLine)window.__ceCloudSync();},10000);}}catch(e){}}
+function save(){try{if(!window.__loadOK)return;S.lastSeen=Date.now();const raw=JSON.stringify(S);if(window.storage)window.storage.set(KEY,raw);else{const prev=localStorage.getItem(KEY);if(prev&&prev!==raw)localStorage.setItem(KEY+'-bak',prev);localStorage.setItem(KEY,raw);}if(window.__ceCloudSync){clearTimeout(window.__ceCloudSyncTimer);window.__ceCloudSyncTimer=setTimeout(()=>{if(navigator.onLine)window.__ceCloudSync();},10000);}}catch(e){}}
 document.addEventListener('visibilitychange',()=>{if(document.hidden)save();});
 window.addEventListener('beforeunload',save);
 let resetArm=0;
@@ -2452,5 +2452,27 @@ if(window.__DEBUG)window.__dbg={S:()=>S,buy:buy,upgrade:upgrade,setS:o=>Object.a
 </script>
 
 
+<script>
+(function(){
+  var RX=/حساب آنلاین|گروه‌ها و اتحادها|بازار جهانی|رتبه‌بندی بازیکنان|رقابت آنلاین|پروفایل و دوستان|ذخیره ابری|بازیابی ابری|Supabase/;
+  function hideOnline(){
+    document.querySelectorAll('.econ-card').forEach(function(c){
+      if(RX.test(c.textContent)) c.style.display='none';
+    });
+    document.querySelectorAll('h3,h4,p.hint,.hint').forEach(function(el){
+      if(RX.test(el.textContent)) el.style.display='none';
+    });
+    document.querySelectorAll('button').forEach(function(b){
+      if(/ذخیره ابری|بازیابی ابری|ورود|ثبت‌نام|خروج|اتصال|قطع اتصال/.test(b.textContent)) b.style.display='none';
+    });
+  }
+  var pending=false;
+  new MutationObserver(function(){
+    if(pending) return; pending=true;
+    setTimeout(function(){pending=false;hideOnline();},150);
+  }).observe(document.body,{childList:true,subtree:true});
+  hideOnline();
+})();
+</script>
 </body>
 </html>
